@@ -23,12 +23,11 @@
 The DAR framework has been used to design a controller for addressing the output regulation problem.
 
 The periodic trajectory is
-```latex
+
 $\begin{cases}
 \omega_{\theta 1} & = \phantom{-}0.4 \cos (t)  \\ 
 \omega_{\theta 2} & =-0.4 \cos (t)
 \end{cases}$
-```
 
 Internal model matrices
 
