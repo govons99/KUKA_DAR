@@ -24,14 +24,16 @@ The DAR framework has been used to design a controller for addressing the output
 
 The periodic trajectory is
 
-$\begin{cases}
-\omega_{\theta 1} & = \phantom{-}0.4 \cos (t)  \\ 
+```math
+\begin{cases}
+\omega_{\theta 1} & = 0.4 \cos (t)  \\ 
 \omega_{\theta 2} & =-0.4 \cos (t)
-\end{cases}$
+\end{cases}
+```
 
 Internal model matrices
 
-$\Phi =
+$$\Phi =
 \begin{bmatrix}
     0 & I & 0 & 0 & 0 \\
     0 & 0 & I & 0 & 0 \\
@@ -43,16 +45,16 @@ $\Phi =
 \Gamma =
 \begin{bmatrix}
     0 \\ 0 \\ 0 \\ 0 \\ I
-\end{bmatrix}$
+\end{bmatrix}$$
 
 Control gain
 
-$\mathbf{K}=
+$$\mathbf{K}=
 \begin{bmatrix}
     -501.1559 & -51.6762 & -61.0883 & -13.9976 & -969.4690 & -58.9046 & -1045.9322 & 1.2262 & -3376.5894 & -224.8351 & -674.4890 & -3.7868 & -1028.4645 & 75.5330 \\
     60.5655 & -192.7508 & -12.5232 & -26.7909 & 194.7745 & -364.1018 & 374.1509 & -376.6959 & 624.2392 & -1274.0779 & 228.6800 & -244.2496 & 171.1357 & -390.1254
 \end{bmatrix}
-$
+$$
 
 ## Observer design
 
@@ -60,7 +62,7 @@ The DAR framework ahs been used to design a full-state observer.
 
 Several gains for the observer have been designed, corresponding to different decay ratios $\tau_2$
 
-$\tau_2=1 \quad K_{o,\theta} =
+$$\tau_2=1 \quad K_{o,\theta} =
 \begin{bmatrix}
 37.7 & -0.2 \\
 3.1 & 33.4
@@ -68,9 +70,9 @@ $\tau_2=1 \quad K_{o,\theta} =
 \begin{bmatrix}
 1177 & -54.3 \\
 -22.6 & 1113
-\end{bmatrix}$
+\end{bmatrix}$$
 
-$\tau_2=10 \quad K_{o,\theta} =
+$$\tau_2=10 \quad K_{o,\theta} =
 \begin{bmatrix}
 40.5 & -0.4 \\
 2.5 & 37
@@ -78,17 +80,17 @@ $\tau_2=10 \quad K_{o,\theta} =
 \begin{bmatrix}
 1221.7 & -71.2 \\
 -27.2 & 1170
-\end{bmatrix}$
+\end{bmatrix}$$
 
-$\tau_2=20 \quad K_{o,\theta} =
+$$\tau_2=20 \quad K_{o,\theta} =
 \begin{bmatrix}
-37.8 & \phantom{-}0.2 \\
+37.8 & 0.2 \\
 2.2 & 41.6
 \end{bmatrix} \quad K_{0,\omega} =
 \begin{bmatrix}
 1810.5 & -125.7 \\
 -96 & 1214.4
-\end{bmatrix}$
+\end{bmatrix}$$
 
 ## Saturation 
 
