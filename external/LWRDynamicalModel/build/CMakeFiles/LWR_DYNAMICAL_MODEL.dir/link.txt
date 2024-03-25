@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC  -pthread -std=c++11 -w -Ofast  -shared -Wl,-soname,libLWR_DYNAMICAL_MODEL.so -o libLWR_DYNAMICAL_MODEL.so CMakeFiles/LWR_DYNAMICAL_MODEL.dir/src/LWR_Dynamic_Model_Lib.cpp.o 

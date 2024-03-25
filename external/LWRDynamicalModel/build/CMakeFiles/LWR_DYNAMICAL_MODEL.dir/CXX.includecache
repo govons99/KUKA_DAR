@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/LWR_Dynamic_Model_Lib.h
+stddef.h
+-
+stdio.h
+-
+
+/home/kuka_linux/Desktop/Corl/Controller_MEMPC/external/LWRDynamicalModel/src/LWR_Dynamic_Model_Lib.cpp
+LWR_Dynamic_Model_Lib.h
+/home/kuka_linux/Desktop/Corl/Controller_MEMPC/external/LWRDynamicalModel/src/LWR_Dynamic_Model_Lib.h
+math.h
+-
+
