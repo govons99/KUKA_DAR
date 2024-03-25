@@ -66,6 +66,12 @@ add_executable(main_sim_DAR "${CMAKE_CURRENT_SOURCE_DIR}/src/main_sim_DAR.cpp")
 
 add_executable(main_DAR "${CMAKE_CURRENT_SOURCE_DIR}/src/main_DAR.cpp")
 
+add_executable(main_DAR_obs "${CMAKE_CURRENT_SOURCE_DIR}/src/main_DAR_observer.cpp")
+
+add_executable(main_DAR_AW "${CMAKE_CURRENT_SOURCE_DIR}/src/main_DAR_AW.cpp")
+
+add_executable(main_DAR_sat "${CMAKE_CURRENT_SOURCE_DIR}/src/main_DAR_sat.cpp")
+
 add_executable(main_FBL_PD "${CMAKE_CURRENT_SOURCE_DIR}/src/main_FBL_PD.cpp")
 
 add_executable(main_SMC "${CMAKE_CURRENT_SOURCE_DIR}/src/main_SMC.cpp")
@@ -75,6 +81,12 @@ target_link_libraries(controller_kuka PUBLIC controller utils "${CMAKE_CURRENT_S
 target_link_libraries(main_sim_DAR controller_kuka)
 
 target_link_libraries(main_DAR controller_kuka)
+
+target_link_libraries(main_DAR_obs controller_kuka)
+
+target_link_libraries(main_DAR_AW controller_kuka)
+
+target_link_libraries(main_DAR_sat controller_kuka)
 
 target_link_libraries(main_FBL_PD controller_kuka)
 
