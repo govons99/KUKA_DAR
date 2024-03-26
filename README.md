@@ -24,12 +24,12 @@ The DAR framework has been used to design a controller for addressing the output
 
 The periodic trajectory is
 
-```math
+$$
 \begin{cases}
 \omega_{\theta 1} & = 0.4 \cos (t)  \\ 
 \omega_{\theta 2} & =-0.4 \cos (t)
 \end{cases}
-```
+$$
 
 Internal model matrices
 
@@ -59,14 +59,6 @@ $$
 ## Observer design
 
 The DAR framework ahs been used to design a full-state observer.
-
-$$
-\left\lbrace \begin{array}{rcl}
-    \dot{\hat{x}}_{\theta} &=& \hat{x}_{\omega} + K_{o,\theta}e \\
-    \dot{\hat{x}}_{\omega} &=& M^{-1}(\hat{x}_{\theta})( \tau - v(\hat{x}_{\theta},\hat{x}_{\omega}) - g_v(\hat{x}_{\theta}) ) + K_{o,\omega}e \\
-    \hat{y} &=& \hat{x}_{\theta}
-\end{array}\right.
-$$
 
 Several gains for the observer have been designed, corresponding to different decay ratios $\tau_2$
 
