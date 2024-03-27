@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
 	d2Q_meas = Kuka_Vec::Constant(0.0);
 
-	Q_filtered = Kuka_Vec::Constant(0.0);
+	Q_filtered = Q0;
 
 	dQ_filtered = Kuka_Vec::Constant(0.0);
 
@@ -161,93 +161,32 @@ int main(int argc, char *argv[])
 	Eigen::Matrix<double, 2, 1> Coriolis_2R;
 	Eigen::Matrix<double, 2, 1> Gravity_2R;
 
-	// horizontal plane
-	/*
-	Eigen::Matrix<double, 4, 1> State_2R = {Controller.Q(0), Controller.Q(3), 0, 0};
-	Eigen::Matrix<double, 2, 1> acc_2R {0, 0};
-	Eigen::Matrix<double, 2, 1> vel_2R {0, 0};
-	Eigen::Matrix<double, 2, 1> pos_2R {Controller.Q(0), Controller.Q(3)};
-	*/
 	// vertical plane
 	Eigen::Matrix<double, 4, 1> State_2R = {Controller.Q(1), Controller.Q(3), 0, 0};
 	Eigen::Matrix<double, 2, 1> acc_2R {0, 0};
 	Eigen::Matrix<double, 2, 1> vel_2R {0, 0};
 	Eigen::Matrix<double, 2, 1> pos_2R {Controller.Q(1), Controller.Q(3)};
 
-	// old values
-	/*
-	Eigen::Matrix<double, 2, 4> PD_Gain {
-		{-21.4267, -0.8640, -17.2654, -1.0133},
-		{-4.8761, -17.7497, -3.9620, -12.6837},
-	};
-	*/
+	// reduced-order observer 2R
 
-	// 25/10
-	/*
-	Eigen::Matrix<double, 2, 4> PD_Gain {
-		{-93.1726, -8.4440, -21.5335, -4.7909},
-		{-17.7032, -34.4521, -6.6227, -20.5367},
-	};
-	*/
+	Eigen::Matrix<double, 2, 1> z_2R {0, 0};
+	Eigen::Matrix<double, 2, 1> dz_2R {0, 0};
+	Eigen::Matrix<double, 2, 1> vel_2R_hat {0, 0};
 
-	// Gain without uncertainties and no gravity
-	/*
-	Eigen::Matrix<double, 2, 4> PD_Gain;
-
-	PD_Gain(0,0) = -93.1726;
-	PD_Gain(0,1) = -8.4440;
-	PD_Gain(0,2) = -21.5335;
-	PD_Gain(0,3) = -4.7909;
-	PD_Gain(1,0) = -17.7032;
-	PD_Gain(1,1) = -34.4521;
-	PD_Gain(1,2) = -6.6227;
-	PD_Gain(1,3) = -20.5367;
-	*/ 
-
-	// Gain with uncertain mass and no gravity
-	/*
-	Eigen::Matrix<double, 2, 4> PD_Gain;
-
-	PD_Gain(0,0) = -206.7802;
-	PD_Gain(0,1) = 25.1567;
-	PD_Gain(0,2) = -162.2236;
-	PD_Gain(0,3) = 2.4361;
-	PD_Gain(1,0) = -20.1485;
-	PD_Gain(1,1) = -220.7650;
-	PD_Gain(1,2) = -5.0760;
-	PD_Gain(1,3) = -131.8218;
-	*/
-
-	// Gain with gravity
-	/*
-	Eigen::Matrix<double, 2, 4> PD_Gain;
-
-	PD_Gain(0,0) = 4976;
-	PD_Gain(0,1) = 6267;
-	PD_Gain(0,2) = 113;
-	PD_Gain(0,3) = 769;
-	PD_Gain(1,0) = -20189;
-	PD_Gain(1,1) = -19397;
-	PD_Gain(1,2) = -1424;
-	PD_Gain(1,3) = -2541;
-	*/
-
-	// Variables for internal model
+	// internal model variables
 
 	Eigen::Matrix<double, 10, 1> eta;
-	
-	eta(0) = 0;
-	eta(1) = 0;
-	eta(2) = 0;
-	eta(3) = 0;
-	eta(4) = 0;
-	eta(5) = 0;
-	eta(6) = 0;
-	eta(7) = 0;
-	eta(8) = 0;
-	eta(9) = 0;
-
-	std::vector<Eigen::Matrix<double, 10, 1>> eta_vec;
+		
+	eta(0) =0.086659;
+	eta(1) =-0.162523;
+	eta(2) =-0.051329;
+	eta(3) =0.048869;
+	eta(4) =-0.122091;
+	eta(5) =0.108416;
+	eta(6) =0.052134;
+	eta(7) =-0.048755;
+	eta(8) =0.123909;
+	eta(9) =-0.106804;
 
 	Eigen::Matrix<double, 10, 1> eta_dot;
 	
@@ -261,52 +200,54 @@ int main(int argc, char *argv[])
 	eta_dot(7) = 0;
 	eta_dot(8) = 0;
 	eta_dot(9) = 0;
-
+	
+	// internal model matrices
+	
 	Eigen::MatrixXd Phi = Eigen::MatrixXd::Zero(10,10);
 
 	Phi.topRightCorner(8,8).setIdentity();
-	Phi(8,2) = -9;
-	Phi(9,3) = -9;
-	Phi(8,6) = -10;
-	Phi(9,7) = -10;
+	Phi(8,2) = -4;
+	Phi(9,3) = -4;
+	Phi(8,6) = -5;
+	Phi(9,7) = -5;
 
 	Eigen::MatrixXd Gamma = Eigen::MatrixXd::Zero(10,2);
 	Gamma(8,0) = 1;
-	Gamma(9,1) = 1;
+	Gamma(9,1) = 1;	
 
-	// Gain for output regulation
-
+	// Gain for output regulation with tau2 = 0.5
+	
 	Eigen::Matrix<double, 2, 14> Theta;
 
-	Theta(0,0) = -9277.13944860092;             
-	Theta(0,1) = 3710.17708672289;
-	Theta(0,2) = -349.234832428913;
-	Theta(0,3) = 266.395117894730;
-	Theta(0,4) = -194809.308523000;
-	Theta(0,5) = 29590.8387072452;
-	Theta(0,6) = -497382.571831891;
-	Theta(0,7) = 83024.4056398725;
-	Theta(0,8) = -512598.396322723;
-	Theta(0,9) = 96517.0532040094;
-	Theta(0,10) = -268819.441373604;
-	Theta(0,11) = 59336.0150773882;
-	Theta(0,12) = -73589.1199037631;
-	Theta(0,13) = 20303.8593336261;
+	Theta(0,0) =-501.155898565127;             
+	Theta(0,1) =-51.6761865127806;
+	Theta(0,2) =-61.0882943277241;
+	Theta(0,3) =-13.9976263306062;
+	Theta(0,4) =-969.468972154189;
+	Theta(0,5) =-58.9046027045928;
+	Theta(0,6) =-1045.93216122359;
+	Theta(0,7) =1.22624259666302;
+	Theta(0,8) =-3376.58940162408;
+	Theta(0,9) =-224.835143816148;
+	Theta(0,10) =-674.488949772308;
+	Theta(0,11) =-3.78682591476815;
+	Theta(0,12) =-1028.46446093092;
+	Theta(0,13) =-75.5329763705095;
 
-	Theta(1,0) = -2029.21453824429;            
-	Theta(1,1) = -7028.36935443040;
-	Theta(1,2) = -80.0713649245077;
-	Theta(1,3) = -523.663369755656;
-	Theta(1,4) = -42740.8155134585;
-	Theta(1,5) = -58507.6257749021;
-	Theta(1,6) = -108901.648552769;
-	Theta(1,7) = -163109.287869734;
-	Theta(1,8) = -111981.948671448;
-	Theta(1,9) = -188381.316026516;
-	Theta(1,10) = -58595.8106911847;
-	Theta(1,11) = -115090.430611396;
-	Theta(1,12) = -16021.4507995792;
-	Theta(1,13) = -39186.9823159717;
+	Theta(1,0) =60.5655345732913;            
+	Theta(1,1) =-192.750792643005;
+	Theta(1,2) =-12.5232087146952;
+	Theta(1,3) =-26.7908721991601;
+	Theta(1,4) =194.774489153570;
+	Theta(1,5) =-364.101769850751;
+	Theta(1,6) =374.150895723798;
+	Theta(1,7) =-376.695898400417;
+	Theta(1,8) =624.239189928293;
+	Theta(1,9) =-1274.07786508565;
+	Theta(1,10) =228.679960394337;
+	Theta(1,11) =-244.249573519456;
+	Theta(1,12) =171.135718240185;
+	Theta(1,13) =-390.125435479686;
 
 	Eigen::Matrix<double, 14, 1> state_output;
 
@@ -316,11 +257,7 @@ int main(int argc, char *argv[])
 
 	Eigen::Matrix<double, 2, 1> control {0.0, 0.0};
 
-	// virtual saturation
-	double th1 = 1000;
-	double th2 = 1000;
-
-	double DELTAT_2R = 0.0001;
+	double DELTAT_2R = 0.0005;
 
 	double Time_2R = 0.0;
 
@@ -334,14 +271,9 @@ int main(int argc, char *argv[])
 
 	std::ofstream file_error(error_save);
 
-	// PD Gains
+	std::string control_save = "control_DAR.txt";
 
-	double P_Gain = 50.0;
-	double D_Gain = 10.0;
-
-	// threshold
-
-	double th = 1000.0;
+	std::ofstream file_control(control_save);
 	
 	//SIMULATION LOOP
 	while ((float)CycleCounter * Controller.FRI->GetFRICycleTime() < RUN_TIME_IN_SECONDS)
@@ -385,10 +317,10 @@ int main(int argc, char *argv[])
 		Gravity_2R(0) = cos(State_2R(0)+State_2R(1))*m2*9.81*l2 + cos(State_2R(0))*(m1+m2)*l1*9.81;
 		Gravity_2R(1) = cos(State_2R(0)+State_2R(1))*m2*9.81*l2;
 
-		state_output(0) = State_2R(0);
-		state_output(1) = State_2R(1);
-		state_output(2) = State_2R(2);
-		state_output(3) = State_2R(3);
+		state_output(0) = Controller.Q(1);
+		state_output(1) = Controller.Q(3);
+		state_output(2) = dQ_filtered(1);
+		state_output(3) = dQ_filtered(3);
 		state_output(4) = eta(0);
 		state_output(5) = eta(1);
 		state_output(6) = eta(2);
@@ -400,31 +332,12 @@ int main(int argc, char *argv[])
 		state_output(12) = eta(8);
 		state_output(13) = eta(9);
 
-		//control = PD_Gain * State_2R;
 		control = Theta * state_output;
+
+		file_control << control.transpose();
+
+		file_control << "\n";
 		
-		if ( control(0) >= th )
-		{
-			control(0) = th;
-			std::cout << "saturating" << std::endl;
-		}
-		if ( control(1) >= th )
-		{
-			control(1) = th;
-			std::cout << "saturating" << std::endl;
-		}
-		if ( control(0) <= -th )
-		{
-			control(0) = -th;
-			std::cout << "saturating" << std::endl;
-		}
-		if ( control(1) <= -th )
-		{
-			control(1) = -th;
-			std::cout << "saturating" << std::endl;
-		}
-		
-		//acc_2R = Mass_2R.inverse()*(control - Coriolis_2R);
 		acc_2R = Mass_2R.inverse()*(control - Coriolis_2R - Gravity_2R);
 
 		vel_2R = vel_2R + DELTAT_2R * acc_2R;
@@ -442,29 +355,7 @@ int main(int argc, char *argv[])
 
 		// Planar vertical 2R
 		Q_ref(1) = pos_2R(0);
-		Q_ref(3) = pos_2R(1);
-
-		/*
-		Q_ref = Q0 + Kuka_Vec::Constant(0.2*(1.0 - std::cos(Time)));
-		
-		dQ_ref = Kuka_Vec::Constant(0.2*std::sin(Time));
-		
-		d2Q_ref = Kuka_Vec::Constant(0.2*std::cos(Time));
-		
-		Q_ref(0) = Q0(0);
-		Q_ref(2) = Q0(2);
-		Q_ref(4) = Q0(4);
-		Q_ref(5) = Q0(5);
-		Q_ref(6) = Q0(6);
-		
-		dQ_ref(4) = 0.0;
-		dQ_ref(5) = 0.0;
-		dQ_ref(6) = 0.0;
-
-		d2Q_ref(4) = 0.0;
-		d2Q_ref(5) = 0.0;
-		d2Q_ref(6) = 0.0;
-		*/		
+		Q_ref(3) = pos_2R(1);		
 
 		Tic = std::chrono::system_clock::now();
 
@@ -480,37 +371,11 @@ int main(int argc, char *argv[])
 
 		state = Controller.GetState(FLAG);
 
-		// FULL-STATE PBSERVER: Nicosia-Tomei
-
-		/*
-		y_tilda = Controller.Q - Controller.Q_hat;
-
-		dx1_hat = Controller.dQ_hat + Controller.kd*y_tilda;
-
-		d2Q_hat = Controller.SimObserver(Controller.Q, y_tilda, dx1_hat, Torques_nom);
-
-		Controller.Q_hat = Controller.EulerIntegration(dx1_hat, Controller.Q_hat);
-
-		Controller.dQ_hat = Controller.EulerIntegration(d2Q_hat, Controller.dQ_hat);
-		*/	
+		Controller.dQ = (Controller.Q - Controller.Qold)/DELTAT_2R;
 
 		Controller.Qsave.push_back(Controller.Q);
 
-		Controller.dQsave.push_back(Controller.dQ);	
-
-		// UPDATING COORDINATES
-
-		Controller.Qold = Controller.Q;
-
-		Controller.dQold = Controller.dQ;
-
-		Controller.dQ = Controller.EulerIntegration(Controller.d2Q,Controller.dQ);
-
-		Controller.Q = Controller.EulerIntegration(Controller.dQ,Controller.Q);
-
-		Controller.dQ_num = Controller.EulerDifferentiation(Controller.Q,Controller.Qold);
-		
-		Controller.GetState(FLAG); 
+		Controller.dQsave.push_back(Controller.dQ);
 
 		//ARRAY SAVING
 
@@ -541,14 +406,14 @@ int main(int argc, char *argv[])
 		std::cout << "Time = " << Time << std::endl;
 
 		//SAFETY CHECK FOR POSITIONS AND VELOCITIES
-		
+		/*
 		if((!Controller.VelocitySafety(Controller.dQ)) || (!Controller.JointSafety(Controller.Q)))
 		{	
 			//EXITING THE CONTROL LOOP
 			std::cout << "Breaking safety controllers for either Velocities and Joints position \n";
 			break;
 		}
-
+		*/
 		// POSITION CONTROL
 
 		for(int y=0;y<NUMBER_OF_JOINTS;y++)
@@ -558,19 +423,31 @@ int main(int argc, char *argv[])
 		
 		Controller.FRI->SetCommandedJointPositions(Controller.JointValuesInRad);
 
-		//noisy_torque_vec.push_back(Torques_measured);
+		//TORQUE MEASUREMENTS
 
-		Controller.Tor_th.push_back(Torques_ref);
+		Controller.MeasureJointTorques();	
+		
+		Controller.torque_measured(0) = Controller.MeasuredTorquesInNm[0];
+		Controller.torque_measured(1) = Controller.MeasuredTorquesInNm[1];
+		Controller.torque_measured(2) = Controller.MeasuredTorquesInNm[2];
+		Controller.torque_measured(3) = Controller.MeasuredTorquesInNm[3];
+		Controller.torque_measured(4) = Controller.MeasuredTorquesInNm[4];
+		Controller.torque_measured(5) = Controller.MeasuredTorquesInNm[5];
+		Controller.torque_measured(6) = Controller.MeasuredTorquesInNm[6];
 
-		// REDUCED OBSERVER
+		Controller.Tor_meas.push_back(Controller.torque_measured);
 
-		Controller.dz = Controller.SimReducedObserver(Controller.Q, Controller.dQ_hat, Torques_nom);
+		torques_temp = Controller.Filter(Controller.Tor_meas,FILTER_LENGTH);
 
-		Controller.z = Controller.EulerIntegration(Controller.dz, Controller.z);
+		Controller.Tor_meas_filtered.push_back(torques_temp);
+
+		//REDUCED-ORDER OBSERVER DYNAMICS			 
+		
+		Controller.dz = Controller.SimReducedObserver(Controller.Q, Controller.dQ_hat, torques_temp);
+		
+		Controller.z = DELTAT_2R*Controller.dz + Controller.z;
 
 		Controller.dQ_hat = Controller.z + Controller.k0*Controller.Q;
-
-		// Saving estimated quantities
 
 		Controller.dQ_hat_save.push_back(Controller.dQ_hat);
 
@@ -597,6 +474,8 @@ int main(int argc, char *argv[])
 	file.close();
 
 	file_error.close();
+
+	file_control.close();
 
 	Controller.FromKukaToDyn(temp,Controller.Qsave);
 	Controller.writer.write_data(qsave,temp);
