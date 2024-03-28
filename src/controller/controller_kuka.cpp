@@ -39,6 +39,49 @@ Eigen::MatrixXd controller_kuka::SimReducedObserver2R(Eigen::MatrixXd Q, Eigen::
     return result;
 };
 
+//DYNAMIC MODEL FOR REDUCED OBSERVER 2R PLANAR ROBOT
+Eigen::MatrixXd controller_kuka::SimObserver2R(Eigen::MatrixXd Q, Eigen::MatrixXd dQ_hat, Eigen::MatrixXd Torque, Eigen::MatrixXd y_tilda)
+{
+    double m1 = 2.6;
+	double m2 = 2.6;
+	double l1 = 0.5;
+	double l2 = 0.5;
+
+    Eigen::Matrix<double, 2, 1> result;
+    Eigen::Matrix<double, 2, 1> Torque_temp;
+
+	Eigen::Matrix<double, 2, 2> Mass_2R;
+	Eigen::Matrix<double, 2, 2> Coriolis_fact_2R;
+	Eigen::Matrix<double, 2, 1> Gravity_2R;
+
+    Eigen::Matrix<double, 2, 2> KP;
+    KP(0,0) = 6000;
+    KP(0,1) = 0;
+    KP(1,0) = 0;
+    KP(1,1) = 4500;
+
+    Eigen::MatrixXd id = Eigen::MatrixXd::Identity(2,2);
+
+    Mass_2R(0,0) = std::pow(2,l2)*m2+2*l1*l2*m2*cos(Q(1))+std::pow(2,l1)*(m1+m2);
+    Mass_2R(0,1) = std::pow(2,l2)*m2+l1*l2*m2*cos(Q(1));
+    Mass_2R(1,0) = std::pow(2,l2)*m2+l1*l2*m2*cos(Q(1));
+    Mass_2R(1,1) = std::pow(2,l2)*m2;
+
+    Coriolis_fact_2R(0,0) = -l1*l2*m2*sin(Q(1))*dQ_hat(1);
+    Coriolis_fact_2R(0,1) = -l1*l2*m2*sin(Q(1))*(dQ_hat(0)+dQ_hat(1));
+    Coriolis_fact_2R(1,0) = l1*l2*m2*sin(Q(1))*dQ_hat(0);
+    Coriolis_fact_2R(1,1) = 0.0;
+    
+    Gravity_2R(0) = cos(Q(0)+Q(1))*m2*9.81*l2 + cos(Q(0))*(m1+m2)*l1*9.81;
+    Gravity_2R(1) = cos(Q(0)+Q(1))*m2*9.81*l2;
+    
+    Torque_temp = Torque - Coriolis_fact_2R*dQ_hat - Gravity_2R + KP*y_tilda;
+
+    result = Mass_2R.inverse() * (Torque_temp);
+
+    return result;
+};
+
 Eigen::MatrixXd controller_kuka::switching(Eigen::MatrixXd s, Eigen::MatrixXd phi)
 {
     Eigen::MatrixXd result(2,1);
