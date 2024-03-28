@@ -116,9 +116,9 @@ class controller_kuka : public controller
 
                 // DAR simulation vertical plane
                 Q(0) = 0;
-                Q(1) = 1.1040;
+                Q(1) = 0.1;
                 Q(2) = 0;
-                Q(3) = -0.7500;
+                Q(3) = -0.1;
                 Q(4) = 0;
                 Q(5) = 0;
                 Q(6) = 0;
@@ -151,6 +151,10 @@ class controller_kuka : public controller
         // reduced observer for the 2R
 
         Eigen::MatrixXd SimReducedObserver2R(Eigen::MatrixXd Q, Eigen::MatrixXd dQ_hat, Eigen::MatrixXd Torque);
+
+        // Nicosia-Tomei for the 2R
+
+        Eigen::MatrixXd SimObserver2R(Eigen::MatrixXd Q, Eigen::MatrixXd dQ_hat, Eigen::MatrixXd Torque, Eigen::MatrixXd y_tilda);
 
         // sign function HOMEMADE
 
