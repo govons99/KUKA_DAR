@@ -76,7 +76,7 @@ $$
 
 ## Observer design
 
-The DAR framework ahs been used to design a full-state observer.
+The DAR framework has been used to design a full-state observer.
 
 Several gains for the observer have been designed, corresponding to different decay ratios $\tau_2$
 
@@ -108,6 +108,16 @@ $$\tau_2=20 \quad K_{o,\theta} =
 \begin{bmatrix}
 1810.5 & -125.7 \\
 -96 & 1214.4
+\end{bmatrix}$$
+
+## Full-information observer design
+
+The observer gain
+
+$$K =
+\begin{bmatrix}
+-303.4526 & 10.9184 & -40.4150 & -8.9930 \\
+18.9294 & -203.1480 & -8.5954 & -25.5580
 \end{bmatrix}$$
 
 ## Saturation 
